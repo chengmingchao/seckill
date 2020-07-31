@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cmc.seckill.server.dao.ItemKillDao">
+    <select id="countByUserId" resultType="java.lang.Integer">
+        select count(1) as total
+         FROM item_kill_success
+    WHERE kill_id = #{killId} AND user_id = #{userId} AND status IN (0)
+    </select>
+
+    <!--获取秒杀详情-->
+    <select id="selectById" resultType="com.cmc.seckill.entity.ItemKill">
+    SELECT
+      a.*,
+      b.name AS itemName,
+      (
+        CASE WHEN (now() BETWEEN a.start_time AND a.end_time AND a.total > 0)
+          THEN 1
+        ELSE 0
+        END
+      )      AS canKill
+    FROM item_kill AS a LEFT JOIN item AS b ON b.id = a.item_id
+    WHERE a.is_active = 1 AND a.id= #{id}
+  </select>
+
+    <!--抢购商品，更新库存-->
+    <update id="updateKillItem">
+    UPDATE item_kill
+    SET total = total - 1
+    WHERE
+        id = #{killId}
+  </update>
+
+    <insert id="insertItemKillSuccess" parameterType="com.cmc.seckill.entity.ItemKillSuccess">
+        insert into item_kill_success
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                code,
+            </if>
+            <if test="itemId != null">
+                item_id,
+            </if>
+            <if test="killId != null">
+                kill_id,
+            </if>
+            <if test="userId != null">
+                user_id,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="itemId != null">
+                #{itemId,jdbcType=INTEGER},
+            </if>
+            <if test="killId != null">
+                #{killId,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null">
+                #{userId,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=TINYINT},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <!--根据秒杀成功后的订单编码查询-->
+    <select id="selectByCode" resultType="com.cmc.seckill.entity.KillSuccessUserInfo">
+    SELECT
+      a.*,
+      b.user_name,
+      b.phone,
+      b.email,
+      c.name AS itemName
+    FROM item_kill_success AS a
+      LEFT JOIN user b ON b.id = a.user_id
+      LEFT JOIN item c ON c.id = a.item_id
+    WHERE a.code = #{code}
+          AND b.is_active = 1
+  </select>
+</mapper>

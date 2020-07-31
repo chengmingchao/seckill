@@ -1,0 +1,6 @@
+com\cmc\seckill\entity\KillSuccessUserInfo.class
+com\cmc\seckill\entity\User.class
+com\cmc\seckill\entity\ItemKillSuccess.class
+com\cmc\seckill\entity\RandomCode.class
+com\cmc\seckill\entity\Item.class
+com\cmc\seckill\entity\ItemKill.class

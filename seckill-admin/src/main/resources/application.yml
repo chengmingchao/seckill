@@ -1,0 +1,20 @@
+server:
+  port: 80
+
+spring:
+  application:
+    name: seckill-admin
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+#配置超时时间---OpenFeign默认等待一秒钟，超过后报错
+ribbon:
+  ReadTimeout: 5000     #指的是建立连接后从服务器读取到可用资源所用的时间。
+  ConnectTimeout: 5000  #指的是建立连接所用的时间，适用于网络状况正常的情况下，两端连接所用的时间。
+
+#配置feign日志
+logging:
+  level:
+    com.cmc.openfeign.service.FeignService: debug

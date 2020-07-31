@@ -1,0 +1,50 @@
+#端口号
+server:
+  port: 9090
+
+#应用名称
+spring:
+  application:
+    name: seckill-server
+#邮件配置
+  mail:
+    host: smtp.163.com
+    username: 17717817092@163.com
+    password: HFDAIVKTFLOGTIGU
+    enable:  true
+    smtp:
+      auth: true
+    starttls:
+      enable: true
+      required: true
+  #nacos配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+#mysql连接配置
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://localhost:3306/db_second_kill?useUnicode=true&characterEncoding-utr-8&useSSL=false
+    username: root
+    password: 123456
+
+#mybatis配置
+mybatis:
+  type-aliases-package: com.cmc.seckill.entity
+  mapper-locations: classpath:mapper/*.xml
+
+#日志级别
+logging:
+  level:
+    com.cmc.seckill.server: debug
+
+#rocketmq配置
+rocketmq:
+  name-server: 192.168.115.127:9876
+  producer:
+    group: my-group
+
+  topic: springboot-mq
