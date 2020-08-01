@@ -19,7 +19,7 @@
         END
       )      AS canKill
     FROM item_kill AS a LEFT JOIN item AS b ON b.id = a.item_id
-    WHERE a.is_active = 1 AND a.id= #{id}
+    WHERE a.is_active = 1 AND a.id= #{killId} and a.total>0
   </select>
 
     <!--抢购商品，更新库存-->
@@ -27,7 +27,7 @@
     UPDATE item_kill
     SET total = total - 1
     WHERE
-        id = #{killId}
+        id = #{killId} and total>0
   </update>
 
     <insert id="insertItemKillSuccess" parameterType="com.cmc.seckill.entity.ItemKillSuccess">
@@ -78,7 +78,7 @@
     <select id="selectByCode" resultType="com.cmc.seckill.entity.KillSuccessUserInfo">
     SELECT
       a.*,
-      b.user_name,
+      b.user_name as userName,
       b.phone,
       b.email,
       c.name AS itemName

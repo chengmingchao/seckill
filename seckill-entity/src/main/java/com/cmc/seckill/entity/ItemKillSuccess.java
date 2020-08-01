@@ -11,7 +11,7 @@ public class ItemKillSuccess {
 
     private Integer killId;
 
-    private String userId;
+    private Integer userId;
 
     private Integer status;
 

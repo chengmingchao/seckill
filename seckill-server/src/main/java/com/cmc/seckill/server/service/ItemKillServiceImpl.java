@@ -19,6 +19,8 @@ public class ItemKillServiceImpl implements ItemKillService {
 
     private SnowFlake snowFlake = new SnowFlake(2, 3);
 
+    @Autowired
+    private RocketMqSendService rocketMqSendService;
     /**
      * 商品秒杀逻辑
      * @param killId
@@ -28,12 +30,12 @@ public class ItemKillServiceImpl implements ItemKillService {
     @Override
     public Boolean SeckillItem(Integer killId, Integer userId) {
         Boolean result = false;
-        //判断当前用户是否已秒杀
+        //判断当前用户是否已成功秒杀
         Integer count = itemKillDao.countByUserId(killId, userId);
         if (count <= 0) {
-            //判断商品秒杀库存充足，以及是否出现在可抢的时间段内
+            //判断商品秒杀库存充足，以及是否出现在可抢的时间段内，库存必须大于0
             ItemKill itemKill = itemKillDao.selectById(killId);
-            if (itemKill != null && itemKill.getCanKill() == 1) {
+            if (itemKill != null && itemKill.getCanKill() == 1 &&itemKill.getTotal()>0) {
                 //扣减库存
                 int i = itemKillDao.updateKillItem(killId);
                 if (i > 0) {
@@ -47,32 +49,48 @@ public class ItemKillServiceImpl implements ItemKillService {
     }
 
     /**
+     * 通过Mq发送秒杀请求
+     * @param itemKillSuccess
+     * @return
+     */
+    @Override
+    public Boolean SeckillItemByMq(ItemKillSuccess itemKillSuccess) {
+        Boolean result = false;
+        //判断当前用户是否已成功秒杀
+        Integer count = itemKillDao.countByUserId(itemKillSuccess.getKillId(), itemKillSuccess.getUserId());
+        if (count <= 0) {
+            //判断商品秒杀库存充足，以及是否出现在可抢的时间段内
+            ItemKill itemKill = itemKillDao.selectById(itemKillSuccess.getKillId());
+            if (itemKill != null && itemKill.getCanKill() == 1) {
+                rocketMqSendService.sendKillItemByMq(itemKillSuccess);
+                result=true;
+            }
+        }
+        return result;
+    }
+
+    /**
      * 通用的方法-记录用户秒杀成功后生成的订单-并进行异步邮件消息的通知
-     *
      * @param kill
      * @param userId
      * @throws Exception
      */
     private void commonRecordKillSuccessInfo(ItemKill kill, Integer userId) {
-        //TODO:记录抢购成功后生成的秒杀订单记录
-
+        //记录抢购成功后生成的秒杀订单记录
         ItemKillSuccess entity = new ItemKillSuccess();
         String orderNo = String.valueOf(snowFlake.nextId());
-
-        //entity.setCode(RandomUtil.generateOrderCode());   //传统时间戳+N位随机数
         entity.setCode(orderNo); //雪花算法
         entity.setItemId(kill.getItemId());
         entity.setKillId(kill.getId());
-        entity.setUserId(userId.toString());
+        entity.setUserId(userId);
         entity.setStatus(0);
         entity.setCreateTime(new Date());
         //TODO:学以致用，举一反三 -> 仿照单例模式的双重检验锁写法
         if (itemKillDao.countByUserId(kill.getId(), userId) <= 0) {
             int res = itemKillDao.insertItemKillSuccess(entity);
-
             if (res > 0) {
                 //TODO:进行异步邮件消息的通知=rabbitmq+mail
-//                rabbitSenderService.sendKillSuccessEmailMsg(orderNo);
+                rocketMqSendService.sendKillSuccessMail(orderNo);
 
                 //TODO:入死信队列，用于 “失效” 超过指定的TTL时间时仍然未支付的订单
 //                rabbitSenderService.sendKillSuccessOrderExpireMsg(orderNo);

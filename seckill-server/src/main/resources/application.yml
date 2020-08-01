@@ -6,7 +6,7 @@ server:
 spring:
   application:
     name: seckill-server
-#邮件配置
+  #邮件配置
   mail:
     host: smtp.163.com
     username: 17717817092@163.com
@@ -29,7 +29,7 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     url: jdbc:mysql://localhost:3306/db_second_kill?useUnicode=true&characterEncoding-utr-8&useSSL=false
     username: root
-    password: 123456
+    password: 123
 
 #mybatis配置
 mybatis:
@@ -43,8 +43,8 @@ logging:
 
 #rocketmq配置
 rocketmq:
-  name-server: 192.168.115.127:9876
+  name-server: localhost:9876
   producer:
     group: my-group
 
-  topic: springboot-mq
+  topic: mail-mq

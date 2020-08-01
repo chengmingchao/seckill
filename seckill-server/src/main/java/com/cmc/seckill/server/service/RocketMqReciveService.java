@@ -2,6 +2,7 @@ package com.cmc.seckill.server.service;
 
 import cn.hutool.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.annotation.ExtRocketMQTemplateConfiguration;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class RocketMqReciveService implements RocketMQListener<String> {
         //主题(标题)
         message.setSubject("尊敬的"+userName);
         //内容
-        message.setText("欢迎使用您使用本公司的产品！");  //发送html，发送html格式源码
+        message.setText("恭喜您抢到商品！");  //发送html，发送html格式源码
         javaMailSender.send(message);
         log.info("发送邮件完成："+new JSONObject(message));
         return  "send success!";

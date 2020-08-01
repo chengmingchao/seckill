@@ -1,11 +1,10 @@
 package com.cmc.seeckill.admin.controller;
 
 import com.cmc.seckill.entity.CommonResult;
+import com.cmc.seckill.entity.ItemKillSuccess;
 import com.cmc.seeckill.admin.service.FeignService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class AdminController {
@@ -27,7 +26,17 @@ public class AdminController {
      * @return
      */
     @GetMapping("/admin/detail/{id}")
-    public CommonResult detail(@PathVariable Integer id){
+    public CommonResult detail(@PathVariable(value = "id") Integer id){
         return feignService.detail(id);
+    }
+
+    /**
+     * 商品秒杀
+     * @param itemKillSuccess
+     * @return
+     */
+    @PostMapping("/admin/seckill")
+    public CommonResult seckill(@RequestBody ItemKillSuccess itemKillSuccess){
+        return feignService.seckill(itemKillSuccess);
     }
 }
